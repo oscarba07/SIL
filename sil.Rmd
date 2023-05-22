@@ -1,0 +1,58 @@
+---
+title: "Iniciativas legislativas-México"
+author: "Oscar Baldenebro"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Objetivo
+
+Este documento tiene como objetivo realizar la descarga y análisis de las iniciativas presentadas en las cámaras de diputados, senadores y en comisiones, en México.
+
+## Fuente de datos
+
+La información a descargar proviene del Sistema de Información Legislativa (SIL) de la Secretaría de Gobernación.
+
+## Pasos
+
+1. Acceder a la plataforma del SIL. En específico, la numeralia de iniciativas en http://sil.gobernacion.gob.mx/portal/Numeralia/iniciativas
+
+2. Seleccionar la Legislatura de interés.
+
+3. Seleccionar la Instancia "Diputados, Senadores y la Comisión permanente".
+
+4. Seleccionar el período de interés.
+
+5. Seleccionar "Buscar".
+
+6. Seleccionar y guardar el número Total de iniciativas presentadas
+
+image: ![](SIL_total.PNG) 
+
+```{r}
+tot <- 460
+```
+
+7. Seleccionar la segunda página de resultados
+
+image: ![](Pag_2.PNG)
+
+8. Copiar y pegar la dirección web en el siguiente código para sustituir el número de resultados por página y la página actual:
+
+```{r}
+url <- 'http://sil.gobernacion.gob.mx/Numeralia/Iniciativas/resultadosNumeraliaIniciativas.php?SID=&Origen=IL&Serial=8a35e4f0f8df2e4837b3a5295a3df854&Reg=460&Paginas=15&pagina=2'
+url <- sub('Paginas=\\d+', paste0('Paginas=',tot), url)
+url <- sub('pagina=2', 'pagina=1', url)
+```
+
+9. Correr el siguiente córdigo:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
