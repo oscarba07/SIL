@@ -1,3 +1,8 @@
+url <- 'http://sil.gobernacion.gob.mx/Numeralia/Iniciativas/resultadosNumeraliaIniciativas.php?SID=&Origen=IL&Serial=8a35e4f0f8df2e4837b3a5295a3df854&Reg=460&Paginas=15&pagina=2'
+tot <- 460
+url <- sub('Paginas=\\d+', paste0('Paginas=',tot), url)
+url <- sub('pagina=2', 'pagina=1', url)
+
 # Carga de paquetería necesaria
 packs <- c('xml2','rvest','stringr','tidyr','dplyr','purrr')
 
