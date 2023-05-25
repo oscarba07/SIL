@@ -1,10 +1,10 @@
-url <- 'http://sil.gobernacion.gob.mx/Numeralia/Iniciativas/resultadosNumeraliaIniciativas.php?SID=&Origen=IL&Serial=8a35e4f0f8df2e4837b3a5295a3df854&Reg=460&Paginas=15&pagina=2'
-tot <- 460
+url <- 'http://sil.gobernacion.gob.mx/Numeralia/Iniciativas/resultadosNumeraliaIniciativas.php?SID=&Origen=IL&Serial=334c274a03d349cf633b61b01cc8feab&Reg=466&Paginas=15&pagina=2'
+tot <- 466
 url <- sub('Paginas=\\d+', paste0('Paginas=',tot), url)
 url <- sub('pagina=2', 'pagina=1', url)
 
 # Carga de paquetería necesaria
-packs <- c('xml2','rvest','stringr','tidyr','dplyr','purrr')
+packs <- c('xml2','rvest','stringr','tidyr','dplyr','purrr','plyr')
 
 for (p in packs) {
   if (!require(p, character.only = T)) {
@@ -53,7 +53,14 @@ head(inic)
 # Split temas
 t <- str_split(inic$tema,'\\d.-')
 # Subset para eliminar blanks
-t <- lapply(t, FUN= function(x) subset(x,x!=''))
+t <- lapply(t, FUN= function(x) subset(x,x!='')) 
+# Funcion para convertir a dataframes con dummies
+todf <- function(x){
+  x.names <- x
+  x <- matrix(1,nrow=1,ncol=length(x),dimnames=list('row',x.names)) %>% data.frame()
+}
+# Convertir a dataframe con dummies
+tdummy_df <- sapply(t, todf) %>% bind_rows() %>% replace(is.na(.),0)
 
-inic$tema.n <- t
-inic <- inic %>% mutate(n = map_dbl(.x=tema.n,.f=length))
+# Unir a dataframe
+inic <- cbind(inic,tdummy_df)
