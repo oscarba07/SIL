@@ -52,12 +52,12 @@ inic_obj <- function(v){
 }
 
 # Definicion de URL
-url <- 'http://sil.gobernacion.gob.mx/Numeralia/Iniciativas/resultadosNumeraliaIniciativas.php?SID=&Origen=IL&Serial=1a6d0ab809d677b464e32a5fcd68985f&Reg=113&Paginas=15&pagina=2'
-tot <- 113
-url <- sub('Paginas=\\d+', paste0('Paginas=',min(tot,15)), url)
+url <- 'http://sil.gobernacion.gob.mx/Numeralia/Iniciativas/resultadosNumeraliaIniciativas.php?SID=&Origen=IL&Serial=79598c75d82eba56a1b26f87e0831ee8&Reg=6594&Paginas=15&pagina=2'
+tot <- 6594
+url <- sub('Paginas=\\d+', paste0('Paginas=',min(tot,999)), url)
 url <- sub('pagina=2', 'pagina=1', url)
 # Determinar total de paginas de resultados
-n.pag <-  ceiling(tot/min(tot,15))
+n.pag <-  ceiling(tot/min(tot,999))
 # Definir vector de urls
 urls <- vector(length = n.pag)
 for (i in 1:n.pag) {
