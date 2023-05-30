@@ -1,7 +1,7 @@
 # Paqueteria --------------------------------------------------------------
 # Carga de paquetería necesaria
 packs <- c('xml2','rvest','stringr','tidyr','dplyr','purrr','plyr','ggplot2',
-           'plotly')
+           'plotly', 'tm', 'wordcloud', 'RColorBrewer')
 
 for (p in packs) {
   if (!require(p, character.only = T)) {
@@ -52,8 +52,8 @@ inic_obj <- function(v){
 }
 
 # Definicion de URL
-url <- 'http://sil.gobernacion.gob.mx/Numeralia/Iniciativas/resultadosNumeraliaIniciativas.php?SID=&Origen=IL&Serial=79598c75d82eba56a1b26f87e0831ee8&Reg=6594&Paginas=15&pagina=2'
-tot <- 6594
+url <- 'http://sil.gobernacion.gob.mx/Numeralia/Iniciativas/resultadosNumeraliaIniciativas.php?SID=&Origen=IL&Serial=c0c59b3d99aa23112ad54fd017ff987c&Reg=113&Paginas=15&pagina=2'
+tot <- 113
 url <- sub('Paginas=\\d+', paste0('Paginas=',min(tot,999)), url)
 url <- sub('pagina=2', 'pagina=1', url)
 # Determinar total de paginas de resultados
@@ -116,11 +116,40 @@ inic.pp <- aggregate(inic[,temas], by = list(inic$p.politico), FUN = sum)
 inic.pp <- inic.pp %>% pivot_longer(cols = temas, values_to = 'n.inic') %>% 
   arrange(desc(n.inic))
 # Grafico
+nmax <- aggregate(inic.pp, n.inic~name, sum)$n.inic %>% max()
 p <- ggplot(inic.pp, aes(x=n.inic,y=name, fill=Group.1)) +
   scale_fill_manual(values=cols) +
   geom_bar(stat="identity", colour="white") + 
   labs(title='Numero de iniciativas por tema',
        x='Numero de iniciativas',y='Tema',fill='Partido politico') +
-  scale_x_continuous(breaks=seq(0,sum(inic.pp$n.inic)+20,20))
+  scale_x_continuous(breaks=seq(0,nmax,nmax/5))
 ggplotly(p)
 
+
+# Wordcloud ---------------------------------------------------------------
+
+objs <- Corpus(VectorSource(inic$objeto))
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+
+objs <- tm_map(objs, toSpace, "/")
+objs <- tm_map(objs, toSpace, "@")
+objs <- tm_map(objs, toSpace, "\\|")
+objs <- tm_map(objs, toSpace, "\\(")
+objs <- tm_map(objs, toSpace, "\\)")
+
+objs <- tm_map(objs, content_transformer(tolower))
+objs <- tm_map(objs, removeNumbers)
+objs <- tm_map(objs, removeWords, stopwords("spanish"))
+objs <- tm_map(objs, removeWords, 
+               c("iniciativa",'objeto'))
+objs <- tm_map(objs, removePunctuation)
+objs <- tm_map(objs, stripWhitespace)
+
+dtm <- TermDocumentMatrix(objs) %>% as.matrix()
+dtm <- sort(rowSums(dtm),decreasing=TRUE)
+dtm <- dtm %>% data.frame(word=names(dtm),freq=dtm)
+
+pal <- brewer.pal(9, "Paired")
+wordcloud(words = dtm$word, freq = dtm$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35,
+          family="serif", colors=pal)
